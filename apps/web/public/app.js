@@ -67,8 +67,14 @@ $('#missing').onclick = () => report('abweichung');
 $('#blocked').onclick = () => { $('#mobileResult').textContent = 'Dringende Meldung erfasst: Fluchtweg blockiert'; };
 $('#snapshot').onclick = () => api('/api/exercises/snapshot', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load);
 $('#exerciseForm').onsubmit = event => { event.preventDefault(); api('/api/exercises', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(load); };
+$('#classForm').onsubmit = event => { event.preventDefault(); api('/api/classes', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(result => { $('#peopleResult').textContent = `Klasse gespeichert: ${result.name}`; return load(); }).catch(error => { $('#peopleResult').textContent = error.message; }); };
+$('#studentForm').onsubmit = event => { event.preventDefault(); api('/api/students', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(result => { $('#peopleResult').textContent = `Person gespeichert: ${result.firstName} ${result.lastName}`; return load(); }).catch(error => { $('#peopleResult').textContent = error.message; }); };
+$('#startExercise').onclick = () => api('/api/exercises/start', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load).catch(error => { $('#mobileResult').textContent = error.message; });
+$('#closeExercise').onclick = () => api('/api/exercises/close', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load).catch(error => { $('#mobileResult').textContent = error.message; });
+
 $('#portalSave').onclick = () => api('/api/infoportal/config', { method: 'POST', body: JSON.stringify({ code: $('#portal').value }) }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); });
 $('#demoImport').onclick = () => api('/api/import/demo', { method: 'POST' }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); });
+$('#studentImport').onclick = () => api('/api/import/students.csv', { method: 'POST', body: JSON.stringify({ csv: $('#studentCsv').value }) }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); return load(); });
 $('#formSubmit').onsubmit = event => { event.preventDefault(); api('/api/forms/submit', { method: 'POST', body: JSON.stringify({ templateId: $('#templateSelect').value, values: { summary: $('#formSummary').value, severity: 'mittel' } }) }).then(result => { $('#formResult').textContent = `Formular gespeichert: ${result.id}`; }); };
 $('#actionForm').onsubmit = event => { event.preventDefault(); api('/api/actions', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(load); };
 window.addEventListener('online', sync);

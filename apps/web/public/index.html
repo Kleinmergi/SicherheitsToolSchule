@@ -49,13 +49,35 @@
         <label>Datum<input name="date" type="date" value="2026-07-13"></label>
         <label>Szenario<textarea name="scenario">Rauchentwicklung im Chemietrakt; Abbruch bei realem Notfall.</textarea></label>
         <button class="btn">Übung anlegen</button>
+        <button class="btn secondary" type="button" id="startExercise">Übung ex1 starten</button>
+        <button class="btn secondary" type="button" id="closeExercise">Übung ex1 abschließen</button>
       </form>
+    </section>
+    <section class="card">
+      <h2>Klassen und Personen</h2>
+      <form id="classForm">
+        <label>Klassen-ID<input name="id" value="c9c"></label>
+        <label>Name<input name="name" value="9C"></label>
+        <label>Sammelplatz<input name="assemblyPointId" value="sp1"></label>
+        <button class="btn">Klasse speichern</button>
+      </form>
+      <form id="studentForm">
+        <label>Personen-ID<input name="id" value="s9"></label>
+        <label>Vorname<input name="firstName" value="Luca"></label>
+        <label>Nachname<input name="lastName" value="Testperson"></label>
+        <label>Klasse<input name="classId" value="c9c"></label>
+        <button class="btn">Person speichern</button>
+      </form>
+      <p id="peopleResult" class="status">Bereit für Stammdatenpflege.</p>
     </section>
     <section class="card">
       <h2>Infoportal / Import</h2>
       <label>Schulkennung oder Loginadresse<input id="portal" value="meine-schule"></label>
       <button class="btn" id="portalSave">Schulkennung speichern</button>
       <button class="btn secondary" id="demoImport">Demo-/CSV-Import ausführen</button>
+      <label>CSV-Schülerimport<textarea id="studentCsv">id,firstName,lastName,classId,supportNeed
+s10,Amira,Import,c7a,</textarea></label>
+      <button class="btn secondary" id="studentImport">Schüler-CSV importieren</button>
       <pre id="portalOut"></pre>
     </section>
     <section class="card">

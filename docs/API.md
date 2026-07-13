@@ -20,3 +20,11 @@
 - `POST /api/auth/logout`: Session beenden.
 - `PUT /api/school`: Schuldaten berechtigt aktualisieren.
 - `PUT /api/users/role`: Benutzerrolle berechtigt ändern.
+
+## Personen, Import und Übungsstatus
+
+- `POST /api/classes`: Klasse anlegen oder aktualisieren.
+- `POST /api/students`: Schülerin oder Schüler anlegen oder aktualisieren.
+- `POST /api/import/students.csv`: CSV-Schülerimport mit Fehlerbericht.
+- `POST /api/exercises/start`: vorbereitete oder freigegebene Übung starten und Snapshot erzeugen.
+- `POST /api/exercises/close`: laufende Übung abschließen und Abschlusszusammenfassung fixieren.
