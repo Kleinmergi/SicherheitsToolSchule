@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <title>SicherheitsTool Schule</title>
+</head>
+<body>
+  <header class="top no-print">
+    <h1>Sicherheitsmanagement für Schulen</h1>
+    <p id="sync">Synchronisationsstatus: wird geladen</p>
+    <nav class="nav" aria-label="Hauptbereiche">
+      <button class="nav-btn" data-target="start">Start</button>
+      <button class="nav-btn" data-target="dashboard">Lagebild</button>
+      <button class="nav-btn" data-target="mobile">Mobile Meldung</button>
+      <button class="nav-btn" data-target="planning">Übung</button>
+      <button class="nav-btn" data-target="masterdata">Stammdaten</button>
+      <button class="nav-btn" data-target="protocols">Protokolle</button>
+    </nav>
+  </header>
+  <main class="grid">
+    <section class="card wide view" data-view="start">
+      <h2>Geführter Einstieg</h2>
+      <ol class="steps">
+        <li><strong>1. Ersteinrichtung oder Anmeldung:</strong> Admin-Passwort setzen und anmelden.</li>
+        <li><strong>2. Stammdaten prüfen:</strong> Klassen und Personen anlegen oder CSV importieren.</li>
+        <li><strong>3. Übung vorbereiten:</strong> Übung planen, starten und Snapshot erzeugen.</li>
+        <li><strong>4. Mobile Meldung:</strong> Klasse vollständig oder Abweichungen melden.</li>
+        <li><strong>5. Lagebild prüfen:</strong> Fehlende Personen und Listen exportieren.</li>
+      </ol>
+      <p class="status">Nutze die Reiter oben. Es wird immer nur ein Arbeitsbereich angezeigt.</p>
+    </section>
+    <section class="card wide view" data-view="start">
+      <h2>Anmeldung und Ersteinrichtung</h2>
+      <form id="setupForm">
+        <label>Initiales Administrator-Passwort<input id="setupPassword" type="password" autocomplete="new-password" minlength="12" placeholder="mindestens 12 Zeichen"></label>
+        <button class="btn">Ersteinrichtung speichern</button>
+      </form>
+      <form id="loginForm">
+        <label>E-Mail<input id="loginEmail" type="email" value="admin@demo.schule" autocomplete="username"></label>
+        <label>Passwort<input id="loginPassword" type="password" autocomplete="current-password"></label>
+        <button class="btn">Anmelden</button>
+      </form>
+      <p id="authStatus" class="status">Anmeldestatus wird geprüft.</p>
+    </section>
+    <section class="card wide view" data-view="dashboard">
+      <h2>Live-Dashboard</h2>
+      <div id="dashboard"></div>
+      <button class="btn" id="snapshot">Anwesenheits-Snapshot erzeugen</button>
+      <a class="btn secondary" href="/api/exports/attendance.csv?exerciseId=ex1">CSV-Anwesenheitsliste</a>
+      <a class="btn secondary" href="/api/exports/attendance.html?exerciseId=ex1" target="_blank" rel="noreferrer">Druckliste / PDF über Browser</a>
+    </section>
+    <section class="card view" data-view="mobile">
+      <h2>Mobile Schnellmeldung</h2>
+      <div class="mobile-actions">
+        <button class="btn" id="complete">✅ Klasse vollständig</button>
+        <button class="btn secondary" id="missing">⚠️ Person fehlt</button>
+        <button class="btn secondary" id="blocked">⛔ Fluchtweg blockiert</button>
+      </div>
+      <p id="mobileResult" class="status">Bereit. Meldungen werden bei Netzausfall lokal gespeichert.</p>
+    </section>
+    <section class="card view" data-view="planning">
+      <h2>Übungsplanung</h2>
+      <form id="exerciseForm">
+        <label>Titel<input name="title" value="Probealarm Gebäudeteil A"></label>
+        <label>Datum<input name="date" type="date" value="2026-07-13"></label>
+        <label>Szenario<textarea name="scenario">Rauchentwicklung im Chemietrakt; Abbruch bei realem Notfall.</textarea></label>
+        <button class="btn">Übung anlegen</button>
+        <button class="btn secondary" type="button" id="startExercise">Übung ex1 starten</button>
+        <button class="btn secondary" type="button" id="closeExercise">Übung ex1 abschließen</button>
+      </form>
+    </section>
+    <section class="card view" data-view="masterdata">
+      <h2>Klassen und Personen</h2>
+      <form id="classForm">
+        <label>Klassen-ID<input name="id" value="c9c"></label>
+        <label>Name<input name="name" value="9C"></label>
+        <label>Sammelplatz<input name="assemblyPointId" value="sp1"></label>
+        <button class="btn">Klasse speichern</button>
+      </form>
+      <form id="studentForm">
+        <label>Personen-ID<input name="id" value="s9"></label>
+        <label>Vorname<input name="firstName" value="Luca"></label>
+        <label>Nachname<input name="lastName" value="Testperson"></label>
+        <label>Klasse<input name="classId" value="c9c"></label>
+        <button class="btn">Person speichern</button>
+      </form>
+      <p id="peopleResult" class="status">Bereit für Stammdatenpflege.</p>
+    </section>
+    <section class="card view" data-view="masterdata">
+      <h2>Infoportal / Import</h2>
+      <label>Schulkennung oder Loginadresse<input id="portal" value="meine-schule"></label>
+      <button class="btn" id="portalSave">Schulkennung speichern</button>
+      <button class="btn secondary" id="demoImport">Demo-/CSV-Import ausführen</button>
+      <label>CSV-Schülerimport<textarea id="studentCsv">id,firstName,lastName,classId,supportNeed
+s10,Amira,Import,c7a,</textarea></label>
+      <button class="btn secondary" id="studentImport">Schüler-CSV importieren</button>
+      <pre id="portalOut"></pre>
+    </section>
+    <section class="card view" data-view="protocols">
+      <h2>Formularvorlagen</h2>
+      <form id="formSubmit">
+        <label>Vorlage<select id="templateSelect"></select></label>
+        <label>Kurzbeschreibung<textarea id="formSummary">Fluchtweg im EG war kurzzeitig blockiert.</textarea></label>
+        <button class="btn">Protokoll speichern</button>
+      </form>
+      <ul id="forms"></ul>
+      <p id="formResult" class="status">Noch kein Formular gespeichert.</p>
+    </section>
+    <section class="card view" data-view="protocols">
+      <h2>Maßnahmen</h2>
+      <form id="actionForm">
+        <label>Titel<input name="title" value="Fluchtweg EG freihalten"></label>
+        <label>Beschreibung<textarea name="description">Beschilderung erneuern und Lagerung im Flur untersagen.</textarea></label>
+        <label>Frist<input name="dueDate" type="date" value="2026-07-20"></label>
+        <button class="btn">Maßnahme aus Befund erzeugen</button>
+      </form>
+      <ul id="actions"></ul>
+    </section>
+    <section class="card view" data-view="mobile">
+      <h2>Offline-Warteschlange</h2>
+      <pre id="queue"></pre>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
