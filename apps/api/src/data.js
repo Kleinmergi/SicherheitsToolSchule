@@ -179,5 +179,66 @@ export function attendanceListHtml(exerciseId) {
   return `<!doctype html><html lang="de"><meta charset="utf-8"><title>Anwesenheitsliste</title><style>@page{size:A4 landscape}body{font-family:Arial}table{width:100%;border-collapse:collapse}td,th{border:1px solid #333;padding:4px}.confidential{font-weight:bold}</style><body><p class="confidential">Vertraulich - ${store.school.name} - erstellt ${generated}</p><h1>Anwesenheitsliste ${exerciseId}</h1><table><tr><th>Name</th><th>Klasse/Kurs</th><th>Raum</th><th>Sammelplatz</th><th>Soll-Status</th><th>Kontrolle</th><th>Bemerkung</th></tr>${body}</table></body></html>`;
 }
 
+export function upsertClass(input) {
+  if (!input.id || !input.name) throw new Error('Klasse benötigt id und name');
+  const existing = store.classes.find(item => item.id === input.id);
+  if (existing) Object.assign(existing, input);
+  else store.classes.push({ id: input.id, name: input.name, teacherId: input.teacherId, assemblyPointId: input.assemblyPointId });
+  audit('admin', existing ? 'class.updated' : 'class.created', 'class', { id: input.id });
+  return store.classes.find(item => item.id === input.id);
+}
+
+export function upsertStudent(input) {
+  if (!input.id || !input.firstName || !input.lastName || !input.classId) throw new Error('Schülerdatensatz benötigt id, firstName, lastName und classId');
+  if (!store.classes.some(item => item.id === input.classId)) throw new Error(`Unbekannte Klasse: ${input.classId}`);
+  const existing = store.students.find(item => item.id === input.id);
+  const data = { id: input.id, firstName: input.firstName, lastName: input.lastName, classId: input.classId, supportNeed: input.supportNeed || undefined };
+  if (existing) Object.assign(existing, data);
+  else store.students.push(data);
+  audit('admin', existing ? 'student.updated' : 'student.created', 'student', { id: input.id, classId: input.classId });
+  return store.students.find(item => item.id === input.id);
+}
+
+export function parseCsv(text) {
+  const lines = String(text || '').trim().split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(item => item.trim());
+  return lines.slice(1).map(line => Object.fromEntries(line.split(',').map((value, index) => [headers[index], value.trim()])));
+}
+
+export function importStudentsCsv(text) {
+  const rows = parseCsv(text);
+  const errors = [];
+  const imported = [];
+  rows.forEach((row, index) => {
+    try { imported.push(upsertStudent(row)); } catch (error) { errors.push({ row: index + 2, error: error.message }); }
+  });
+  audit('secretariat', 'students.imported', 'student', { imported: imported.length, errors: errors.length });
+  return { imported: imported.length, errors };
+}
+
+export function startExercise(exerciseId) {
+  const exercise = store.exercises.find(item => item.id === exerciseId);
+  if (!exercise) throw new Error('Übung nicht gefunden');
+  if (!['geplant', 'freigegeben'].includes(exercise.status)) throw new Error(`Übung kann aus Status ${exercise.status} nicht gestartet werden`);
+  exercise.status = 'laufend';
+  exercise.startedAt = new Date().toISOString();
+  const snapshot = createSnapshot(exerciseId);
+  audit('safety', 'exercise.started', 'exercise', { exerciseId, snapshot: snapshot.length });
+  return { exercise, snapshotCount: snapshot.length };
+}
+
+export function closeExercise(exerciseId) {
+  const exercise = store.exercises.find(item => item.id === exerciseId);
+  if (!exercise) throw new Error('Übung nicht gefunden');
+  if (exercise.status !== 'laufend') throw new Error(`Übung kann aus Status ${exercise.status} nicht abgeschlossen werden`);
+  const summary = dashboard(exerciseId);
+  exercise.status = 'abgeschlossen';
+  exercise.closedAt = new Date().toISOString();
+  exercise.finalSummary = summary;
+  audit('safety', 'exercise.closed', 'exercise', { exerciseId, missing: summary.missing.length, reported: summary.reportedTotal });
+  return { exercise, summary };
+}
+
 load();
 seedFormTemplates();

@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { attendanceListHtml, audit, createActionFromFinding, createFormTemplate, createSnapshot, dashboard, duplicateFormTemplate, fieldTypes, findUserByEmail, normalizeInfoportal, permissions, seedFormTemplates, setUserPassword, store, submitForm, updateSchool, updateUserRole, verifyPassword } from './data.js';
+import { attendanceListHtml, audit, closeExercise, createActionFromFinding, createFormTemplate, createSnapshot, dashboard, duplicateFormTemplate, fieldTypes, findUserByEmail, importStudentsCsv, normalizeInfoportal, permissions, seedFormTemplates, setUserPassword, startExercise, store, submitForm, updateSchool, updateUserRole, upsertClass, upsertStudent, verifyPassword } from './data.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const web = path.resolve(__dirname, '../../web/public');
@@ -42,6 +42,7 @@ function send(res, code, body, contentType = 'application/json; charset=utf-8', 
     'content-security-policy': "default-src 'self'; style-src 'self' 'unsafe-inline'",
     ...extraHeaders
   });
+  if (Buffer.isBuffer(body)) return res.end(body);
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
 
@@ -104,6 +105,18 @@ const routes = {
       send(res, 200, updateUserRole(payload.userId, payload.role));
     } catch (error) { send(res, 400, { error: error.message }); }
   },
+  'POST /api/classes': async (req, res) => {
+    if (!requirePerm(req, res, 'school:manage')) return;
+    try { send(res, 201, upsertClass(await body(req))); } catch (error) { send(res, 400, { error: error.message }); }
+  },
+  'POST /api/students': async (req, res) => {
+    if (!requirePerm(req, res, 'school:manage')) return;
+    try { send(res, 201, upsertStudent(await body(req))); } catch (error) { send(res, 400, { error: error.message }); }
+  },
+  'POST /api/import/students.csv': async (req, res) => {
+    if (!requirePerm(req, res, 'imports:run')) return;
+    try { send(res, 200, importStudentsCsv((await body(req)).csv)); } catch (error) { send(res, 400, { error: error.message }); }
+  },
   'POST /api/infoportal/config': async (req, res) => {
     if (!requirePerm(req, res, 'imports:run')) return;
     const payload = await body(req);
@@ -126,6 +139,14 @@ const routes = {
     store.calendar.push({ id: `cal${store.calendar.length + 1}`, title: exercise.title, date: exercise.date, type: 'Probealarm' });
     audit('safety', 'exercise.created', 'exercise', { id: exercise.id });
     send(res, 201, exercise);
+  },
+  'POST /api/exercises/start': async (req, res) => {
+    if (!requirePerm(req, res, 'exercises:manage')) return;
+    try { send(res, 200, startExercise((await body(req)).exerciseId)); } catch (error) { send(res, 400, { error: error.message }); }
+  },
+  'POST /api/exercises/close': async (req, res) => {
+    if (!requirePerm(req, res, 'exercises:manage')) return;
+    try { send(res, 200, closeExercise((await body(req)).exerciseId)); } catch (error) { send(res, 400, { error: error.message }); }
   },
   'POST /api/exercises/approve': async (req, res) => {
     if (!requirePerm(req, res, 'exercises:approve')) return;

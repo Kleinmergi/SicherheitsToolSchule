@@ -17,3 +17,12 @@ test('GitHub-Sync-Skript erzeugt lokalen Sync-Plan ohne externe Änderung', () =
   assert.match(result.stdout, /39 User Stories/);
   assert.match(result.stdout, /gh issue create/);
 });
+
+
+test('GitHub-Project-CSV kann für vorhandenes Kanban erzeugt werden', () => {
+  const result = spawnSync('node', ['scripts/export-github-project-csv.mjs', '/tmp/github-project-import-test.csv'], { encoding: 'utf8' });
+  assert.equal(result.status, 0);
+  const csv = fs.readFileSync('/tmp/github-project-import-test.csv', 'utf8');
+  assert.match(csv, /US-001/);
+  assert.match(csv, /Sprint 3/);
+});
