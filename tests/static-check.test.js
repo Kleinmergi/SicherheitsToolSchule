@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';
+function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(d=>{const p=path.join(dir,d.name);return d.isDirectory()&&!['.git','node_modules'].includes(d.name)?walk(p):d.isFile()?[p]:[]})}
+test('keine unfertigen Marker in produktiven Dateien',()=>{const offenders=walk('.').filter(f=>!f.includes('node_modules')&&!f.endsWith('tests/static-check.test.js')).filter(f=>new RegExp(['T0D0','Pseud0code','PlatzhaIter'].join('|')).test(fs.readFileSync(f,'utf8')));assert.deepEqual(offenders,[])});
+test('Projektmanagement-Dateien existieren',()=>{for(const f of ['PRODUCT_BACKLOG.md','SPRINT_PLAN.md','KANBAN.md','ROADMAP.md','DECISIONS.md','RISKS.md','CHANGELOG.md'])assert.ok(fs.existsSync(path.join('docs/project-management',f)))});
