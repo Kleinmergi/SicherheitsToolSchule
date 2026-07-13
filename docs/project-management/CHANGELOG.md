@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.4 - 2026-07-13
+- Frontend blockiert geschützte Aktionen bis zur Anmeldung und zeigt eine verständliche Meldung statt 403-Fehlerflut.
+- Offline-Synchronisation wartet jetzt auf eine aktive Session.
+- API-Fehler werden im Frontend lesbar aus JSON-Fehlerantworten extrahiert.
+- Regressionstest für geschützte Frontend-Aktionen ohne Anmeldung ergänzt.
+
 ## 0.5.3 - 2026-07-13
 - Service Worker Cache auf Version v2 gehoben und alte Caches werden beim Aktivieren gelöscht.
 - Service Worker übernimmt neue Version sofort mit `skipWaiting()` und `clients.claim()`, damit der Browser nicht weiter eine alte Buffer-JSON-Startseite ausliefert.
