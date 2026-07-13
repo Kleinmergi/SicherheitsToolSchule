@@ -44,6 +44,47 @@ export function load(file = process.env.STS_DATA_FILE) {
   return true;
 }
 
+export function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `scrypt:${salt}:${hash}`;
+}
+
+export function verifyPassword(password, encoded) {
+  if (!encoded?.startsWith('scrypt:')) return false;
+  const [, salt, hash] = encoded.split(':');
+  const candidate = crypto.scryptSync(password, salt, 64);
+  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), candidate);
+}
+
+export function setUserPassword(userId, password) {
+  if (!password || password.length < 12) throw new Error('Passwort muss mindestens 12 Zeichen lang sein');
+  const user = store.users.find(item => item.id === userId);
+  if (!user) throw new Error('Benutzer nicht gefunden');
+  user.passwordHash = hashPassword(password);
+  user.passwordChangedAt = new Date().toISOString();
+  audit('system', 'user.passwordChanged', 'user', { userId });
+  return { id: user.id, email: user.email, role: user.role };
+}
+
+export function findUserByEmail(email) {
+  return store.users.find(item => item.email.toLowerCase() === String(email || '').toLowerCase());
+}
+
+export function updateSchool(input) {
+  store.school = { ...store.school, ...input, infoportalUrl: input.infoportalUrl || store.school.infoportalUrl };
+  audit('admin', 'school.updated', 'school', { name: store.school.name, year: store.school.year });
+  return store.school;
+}
+
+export function updateUserRole(userId, role) {
+  if (!permissions[role]) throw new Error('Unbekannte Rolle');
+  const user = store.users.find(item => item.id === userId);
+  if (!user) throw new Error('Benutzer nicht gefunden');
+  user.role = role;
+  audit('admin', 'user.roleChanged', 'user', { userId, role });
+  return { id: user.id, name: user.name, email: user.email, role: user.role };
+}
+
 export function audit(user, action, entity, details = {}) {
   store.audit.push({ id: crypto.randomUUID(), at: new Date().toISOString(), user, action, entity, details });
   persist();

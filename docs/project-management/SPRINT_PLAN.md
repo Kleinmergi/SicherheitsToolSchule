@@ -17,7 +17,7 @@ Die Sprintzuordnung folgt der gewünschten fachlichen Reihenfolge. Bereits vorha
 - Geplante Story Points: 21
 - Teststrategie: Starttest, Authentifizierungstests, Rollen-/Berechtigungstests, Stammdaten-API-Tests.
 - Risiken: Sichere Passwortspeicherung und Sessionverwaltung benötigen echte Persistenz.
-- Status: US-001 erledigt; US-003 technisch teilweise erledigt; US-002 und US-004 bleiben priorisiert.
+- Status: US-001 bis US-004 erledigt; nächste Härtung ist Argon2id/Produktdatenbank statt Demo-In-Memory-Betrieb.
 
 ## Sprint 2 – Personen und Übungen
 - Zeitraum: 2026-07-29 bis 2026-08-12

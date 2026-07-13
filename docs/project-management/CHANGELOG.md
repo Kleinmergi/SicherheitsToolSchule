@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 - 2026-07-13
+- Ersteinrichtung für initiales Administrator-Passwort ergänzt.
+- Login mit HttpOnly-Session-Cookie, CSRF-Token und Logout ergänzt.
+- Geschützte Endpunkte für Schuldatenänderung und Rollenänderung ergänzt.
+- PWA um Ersteinrichtung und Anmeldung erweitert.
+- Tests für Passwort-Hashing, Benutzer-/Schulverwaltung und Rollenänderung ergänzt.
+
 ## 0.3.0 - 2026-07-13
 - Product Backlog auf 39 kleinschrittige User Stories entlang der 11 gewünschten Epics umgestellt.
 - Sprintplan auf Sprint 0 bis Sprint 7 mit MVP-Meilenstein in Sprint 3 ausgerichtet.

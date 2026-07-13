@@ -18,7 +18,7 @@ docker compose up --build
 
 ## Enthaltene Funktionen
 
-- Rollen- und Berechtigungsmatrix für Administrator, Sicherheitsbeauftragte, Schulleitung, Lehrkräfte, Sekretariat und Beobachter.
+- Ersteinrichtung, Anmeldung per HttpOnly-Session-Cookie, CSRF-Token und Rollen-/Berechtigungsmatrix für Administrator, Sicherheitsbeauftragte, Schulleitung, Lehrkräfte, Sekretariat und Beobachter.
 - Schulstammdaten mit fiktiven Klassen, Schülern, Absenzen, Gebäuden und Sammelplätzen.
 - Infoportal-Konfiguration ohne erfundene API-Endpunkte: Schulkennung wird in die Login-URL umgewandelt, Provider-Reihenfolge bevorzugt offizielle API/Exports und fällt auf CSV/Excel/manuell/Demo zurück.
 - Übungsplanung mit Aufgaben- und Kalendereintrag.

@@ -14,6 +14,19 @@
   </header>
   <main class="grid">
     <section class="card wide">
+      <h2>Anmeldung und Ersteinrichtung</h2>
+      <form id="setupForm">
+        <label>Initiales Administrator-Passwort<input id="setupPassword" type="password" autocomplete="new-password" minlength="12" placeholder="mindestens 12 Zeichen"></label>
+        <button class="btn">Ersteinrichtung speichern</button>
+      </form>
+      <form id="loginForm">
+        <label>E-Mail<input id="loginEmail" type="email" value="admin@demo.schule" autocomplete="username"></label>
+        <label>Passwort<input id="loginPassword" type="password" autocomplete="current-password"></label>
+        <button class="btn">Anmelden</button>
+      </form>
+      <p id="authStatus" class="status">Anmeldestatus wird geprüft.</p>
+    </section>
+    <section class="card wide">
       <h2>Live-Dashboard</h2>
       <div id="dashboard"></div>
       <button class="btn" id="snapshot">Anwesenheits-Snapshot erzeugen</button>

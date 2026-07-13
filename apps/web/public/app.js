@@ -1,8 +1,11 @@
 const $ = selector => document.querySelector(selector);
 const qKey = 'offlineAttendanceQueue';
+let csrfToken = null;
+let currentUser = null;
 
 async function api(url, options = {}) {
-  const response = await fetch(url, { headers: { 'content-type': 'application/json', 'x-role': 'Administrator' }, ...options });
+  const headers = { 'content-type': 'application/json', ...(csrfToken ? { 'x-csrf-token': csrfToken } : {}) };
+  const response = await fetch(url, { credentials: 'same-origin', headers, ...options });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
@@ -20,7 +23,17 @@ async function sync() {
   $('#sync').textContent = 'Synchronisationsstatus: online und synchronisiert';
 }
 
+async function refreshAuth() {
+  const auth = await api('/api/auth/me');
+  csrfToken = auth.csrfToken;
+  currentUser = auth.user;
+  $('#setupForm').style.display = auth.setupRequired ? 'block' : 'none';
+  $('#loginForm').style.display = auth.user ? 'none' : 'block';
+  $('#authStatus').textContent = auth.user ? `Angemeldet als ${auth.user.name} (${auth.user.role})` : auth.setupRequired ? 'Ersteinrichtung erforderlich: initiales Admin-Passwort vergeben.' : 'Nicht angemeldet.';
+}
+
 async function load() {
+  await refreshAuth();
   const bootstrap = await api('/api/bootstrap');
   $('#forms').innerHTML = bootstrap.formTemplates.slice(0, 12).map(form => `<li>${form.name} · Version ${form.version}</li>`).join('');
   $('#templateSelect').innerHTML = bootstrap.formTemplates.map(form => `<option value="${form.id}">${form.name}</option>`).join('');
@@ -45,6 +58,9 @@ async function report(status) {
   }
   load();
 }
+
+$('#setupForm').onsubmit = event => { event.preventDefault(); api('/api/auth/setup', { method: 'POST', body: JSON.stringify({ password: $('#setupPassword').value }) }).then(() => { $('#authStatus').textContent = 'Ersteinrichtung gespeichert. Bitte anmelden.'; return refreshAuth(); }).catch(error => { $('#authStatus').textContent = error.message; }); };
+$('#loginForm').onsubmit = event => { event.preventDefault(); api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: $('#loginEmail').value, password: $('#loginPassword').value }) }).then(result => { csrfToken = result.csrfToken; currentUser = result.user; return load(); }).catch(error => { $('#authStatus').textContent = error.message; }); };
 
 $('#complete').onclick = () => report('vollständig');
 $('#missing').onclick = () => report('abweichung');

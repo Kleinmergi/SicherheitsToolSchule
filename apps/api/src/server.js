@@ -3,19 +3,44 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { attendanceListHtml, audit, createActionFromFinding, createFormTemplate, createSnapshot, dashboard, duplicateFormTemplate, fieldTypes, normalizeInfoportal, permissions, seedFormTemplates, store, submitForm } from './data.js';
+import { attendanceListHtml, audit, createActionFromFinding, createFormTemplate, createSnapshot, dashboard, duplicateFormTemplate, fieldTypes, findUserByEmail, normalizeInfoportal, permissions, seedFormTemplates, setUserPassword, store, submitForm, updateSchool, updateUserRole, verifyPassword } from './data.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const web = path.resolve(__dirname, '../../web/public');
 const port = process.env.PORT || 3000;
+const sessions = new Map();
 
-function send(res, code, body, contentType = 'application/json; charset=utf-8') {
+function parseCookies(req) {
+  return Object.fromEntries(String(req.headers.cookie || '').split(';').filter(Boolean).map(item => {
+    const [key, ...value] = item.trim().split('=');
+    return [key, decodeURIComponent(value.join('='))];
+  }));
+}
+
+function currentSession(req) {
+  const sid = parseCookies(req).sts_session;
+  const session = sid ? sessions.get(sid) : null;
+  if (!session || session.expiresAt < Date.now()) {
+    if (sid) sessions.delete(sid);
+    return null;
+  }
+  return session;
+}
+
+function publicUser(user) {
+  if (!user) return null;
+  const { passwordHash, ...safe } = user;
+  return safe;
+}
+
+function send(res, code, body, contentType = 'application/json; charset=utf-8', extraHeaders = {}) {
   res.writeHead(code, {
     'content-type': contentType,
     'x-content-type-options': 'nosniff',
     'x-frame-options': 'DENY',
     'referrer-policy': 'no-referrer',
-    'content-security-policy': "default-src 'self'; style-src 'self' 'unsafe-inline'"
+    'content-security-policy': "default-src 'self'; style-src 'self' 'unsafe-inline'",
+    ...extraHeaders
   });
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
@@ -27,9 +52,14 @@ async function body(req) {
 }
 
 function requirePerm(req, res, perm) {
-  const role = req.headers['x-role'] || 'Administrator';
-  if (!(permissions[role] || []).includes(perm)) {
+  const session = currentSession(req);
+  const role = session?.role || req.headers['x-role'];
+  if (!role || !(permissions[role] || []).includes(perm)) {
     send(res, 403, { error: 'Keine Berechtigung', required: perm });
+    return false;
+  }
+  if (session && !['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers['x-csrf-token'] !== session.csrfToken) {
+    send(res, 403, { error: 'CSRF-Prüfung fehlgeschlagen' });
     return false;
   }
   return true;
@@ -37,7 +67,43 @@ function requirePerm(req, res, perm) {
 
 const routes = {
   'GET /api/health': (req, res) => send(res, 200, { status: 'ok', app: 'SicherheitsToolSchule' }),
-  'GET /api/bootstrap': (req, res) => send(res, 200, { school: store.school, users: store.users, roles: Object.keys(permissions), permissions, classes: store.classes, students: store.students.map(({ supportNeed, ...student }) => student), exercises: store.exercises, assemblyPoints: store.assemblyPoints, formTemplates: seedFormTemplates(), fieldTypes, actions: store.actions }),
+  'GET /api/auth/me': (req, res) => {
+    const session = currentSession(req);
+    send(res, 200, { user: publicUser(store.users.find(item => item.id === session?.userId)), csrfToken: session?.csrfToken || null, setupRequired: !store.users.some(item => item.passwordHash) });
+  },
+  'POST /api/auth/setup': async (req, res) => {
+    if (store.users.some(item => item.passwordHash)) return send(res, 409, { error: 'Ersteinrichtung bereits abgeschlossen' });
+    const payload = await body(req);
+    const user = setUserPassword('u-admin', payload.password);
+    send(res, 201, { user });
+  },
+  'POST /api/auth/login': async (req, res) => {
+    const payload = await body(req);
+    const user = findUserByEmail(payload.email);
+    if (!user || !verifyPassword(payload.password, user.passwordHash)) return send(res, 401, { error: 'Anmeldung fehlgeschlagen' });
+    const sid = crypto.randomUUID();
+    const csrfToken = crypto.randomUUID();
+    sessions.set(sid, { userId: user.id, role: user.role, csrfToken, expiresAt: Date.now() + 8 * 60 * 60 * 1000 });
+    audit(user.id, 'auth.login', 'session', { role: user.role });
+    send(res, 200, { user: publicUser(user), csrfToken }, 'application/json; charset=utf-8', { 'set-cookie': `sts_session=${encodeURIComponent(sid)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800` });
+  },
+  'POST /api/auth/logout': (req, res) => {
+    const sid = parseCookies(req).sts_session;
+    if (sid) sessions.delete(sid);
+    send(res, 200, { ok: true }, 'application/json; charset=utf-8', { 'set-cookie': 'sts_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0' });
+  },
+  'GET /api/bootstrap': (req, res) => send(res, 200, { school: store.school, users: store.users.map(publicUser), roles: Object.keys(permissions), permissions, classes: store.classes, students: store.students.map(({ supportNeed, ...student }) => student), exercises: store.exercises, assemblyPoints: store.assemblyPoints, formTemplates: seedFormTemplates(), fieldTypes, actions: store.actions }),
+  'PUT /api/school': async (req, res) => {
+    if (!requirePerm(req, res, 'school:manage')) return;
+    send(res, 200, updateSchool(await body(req)));
+  },
+  'PUT /api/users/role': async (req, res) => {
+    if (!requirePerm(req, res, 'roles:manage')) return;
+    try {
+      const payload = await body(req);
+      send(res, 200, updateUserRole(payload.userId, payload.role));
+    } catch (error) { send(res, 400, { error: error.message }); }
+  },
   'POST /api/infoportal/config': async (req, res) => {
     if (!requirePerm(req, res, 'imports:run')) return;
     const payload = await body(req);
