@@ -1,7 +1,7 @@
 # Kanban
 
-WIP-Limit: maximal 2 Karten in „In Progress“.
+WIP-Limit: maximal 2 Karten in „In Progress“. Dieses Board ist die lokale Alternative, solange kein GitHub Project per `gh` erreichbar ist.
 
 | Backlog | Ready | In Progress | Review | Test | Done | Blocked |
 |---|---|---|---|---|---|---|
-| US-010 Maßnahmen (Should, 8, Sprint 2) | US-008 Formulare (Should, 13, Sprint 2) | US-009 PDF/Excel (Should, 8, Sprint 2) |  |  | US-001 Startbare Anwendung (Must, 5, Sprint 0)<br>US-002 Rollen & Rechte (Must, 8, Sprint 1)<br>US-003 Infoportal/Import (Must, 8, Sprint 1)<br>US-004 Übungsplanung (Must, 8, Sprint 1)<br>US-005 Snapshot (Must, 13, Sprint 1)<br>US-006 Mobile Meldung (Must, 13, Sprint 1)<br>US-007 Live-Dashboard (Must, 8, Sprint 1) | Offizielle Schule-Infoportal-API nicht belegt |
+| US-010, US-017, US-020, US-021, US-022, US-023, US-024, US-025, US-026, US-027, US-028, US-029, US-030, US-032, US-033, US-034, US-037, US-038 | US-002, US-004, US-005, US-006, US-009, US-011, US-014, US-035 | US-003 |  |  | US-001, US-007, US-008, US-012, US-013, US-015, US-016, US-018, US-019, US-031, US-036, US-039 | GitHub Project extern nicht synchronisierbar: kein `gh`, kein Git-Remote |

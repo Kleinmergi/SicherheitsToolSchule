@@ -1,1 +1,17 @@
-:root{font-family:Arial,system-ui,sans-serif;color:#123;background:#f8fafc}body{margin:0}.top{background:#0f766e;color:white;padding:1rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;padding:1rem}.card{background:white;border:1px solid #cbd5e1;border-radius:14px;padding:1rem;box-shadow:0 2px 8px #0001}.btn{display:inline-block;border:0;border-radius:12px;background:#0f766e;color:white;padding:1rem 1.2rem;margin:.25rem;font-weight:700;font-size:1rem}.btn.secondary{background:#334155}.status{padding:.7rem;border-radius:10px;background:#e0f2fe}.danger{background:#fee2e2}.ok{background:#dcfce7}input,select,textarea{width:100%;padding:.8rem;margin:.25rem 0 1rem;border:1px solid #94a3b8;border-radius:10px}.mobile-actions .btn{width:100%;font-size:1.15rem}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e2e8f0;padding:.5rem;text-align:left}@media print{.no-print{display:none}.card{box-shadow:none;border:0}}
+:root { font-family: Arial, system-ui, sans-serif; color: #123; background: #f8fafc; }
+body { margin: 0; }
+.top { background: #0f766e; color: white; padding: 1rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; }
+.card { background: white; border: 1px solid #cbd5e1; border-radius: 14px; padding: 1rem; box-shadow: 0 2px 8px #0001; }
+.wide { grid-column: 1 / -1; }
+.btn { display: inline-block; border: 0; border-radius: 12px; background: #0f766e; color: white; padding: 1rem 1.2rem; margin: .25rem; font-weight: 700; font-size: 1rem; text-decoration: none; cursor: pointer; }
+.btn.secondary { background: #334155; }
+.status { padding: .7rem; border-radius: 10px; background: #e0f2fe; }
+.danger { background: #fee2e2; }
+.ok { background: #dcfce7; }
+input, select, textarea { width: 100%; box-sizing: border-box; padding: .8rem; margin: .25rem 0 1rem; border: 1px solid #94a3b8; border-radius: 10px; }
+.mobile-actions .btn { width: 100%; font-size: 1.15rem; }
+table { width: 100%; border-collapse: collapse; }
+td, th { border-bottom: 1px solid #e2e8f0; padding: .5rem; text-align: left; }
+pre { white-space: pre-wrap; }
+@media print { .no-print { display: none; } .card { box-shadow: none; border: 0; } }
