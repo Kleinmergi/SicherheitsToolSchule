@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {normalizeInfoportal,createSnapshot,dashboard,store} from '../apps/api/src/data.js';
+test('Infoportal-Schulkennung wird zu Login-URL normalisiert',()=>{assert.equal(normalizeInfoportal('meine-schule'),'https://schule-infoportal.de/login/meine-schule')});
+test('Snapshot berücksichtigt bekannte Absenzen und bleibt dedupliziert',()=>{const a=createSnapshot('ex1');const b=createSnapshot('ex1');assert.equal(a.length,b.length);assert.equal(a.find(x=>x.personId==='s3').absenceStatus,'krank')});
+test('Dashboard erkennt fehlende Personen nach Teilmeldung',()=>{store.attendanceReports.length=0;store.attendanceReports.push({id:'r1',exerciseId:'ex1',group:'7A',status:'abweichung',presentPersonIds:['s1'],submittedAt:new Date().toISOString()});const d=dashboard('ex1');assert.equal(d.reportedTotal,1);assert.ok(d.missing.some(m=>m.personId==='s2'))});
