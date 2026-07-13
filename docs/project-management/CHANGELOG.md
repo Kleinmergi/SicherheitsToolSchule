@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 - 2026-07-13
+- PWA-Oberfläche neu strukturiert: geführter Einstieg, Hauptnavigation und getrennte Arbeitsbereiche statt gleichzeitiger Anzeige aller Funktionen.
+- Start, Lagebild, mobile Meldung, Übung, Stammdaten und Protokolle sind als Reiter erreichbar.
+- Regressionstest für die geführte Navigation ergänzt.
+
 ## 0.5.4 - 2026-07-13
 - Frontend blockiert geschützte Aktionen bis zur Anmeldung und zeigt eine verständliche Meldung statt 403-Fehlerflut.
 - Offline-Synchronisation wartet jetzt auf eine aktive Session.

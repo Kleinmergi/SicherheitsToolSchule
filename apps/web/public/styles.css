@@ -15,3 +15,5 @@ table { width: 100%; border-collapse: collapse; }
 td, th { border-bottom: 1px solid #e2e8f0; padding: .5rem; text-align: left; }
 pre { white-space: pre-wrap; }
 @media print { .no-print { display: none; } .card { box-shadow: none; border: 0; } }
+
+.nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}.nav-btn{border:1px solid #ccfbf1;background:white;color:#0f766e;border-radius:999px;padding:.7rem 1rem;font-weight:700;cursor:pointer}.nav-btn.active{background:#134e4a;color:white}.view{display:none}.view.active{display:block}.steps{line-height:1.8}.steps li{margin:.3rem 0}.grid{align-items:start}

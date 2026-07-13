@@ -32,6 +32,16 @@ function setProtectedDisabled(disabled) {
   });
 }
 
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(section => section.classList.toggle('active', section.dataset.view === name));
+  document.querySelectorAll('.nav-btn').forEach(button => button.classList.toggle('active', button.dataset.target === name));
+}
+
+document.querySelectorAll('.nav-btn').forEach(button => {
+  button.addEventListener('click', () => showView(button.dataset.target));
+});
+
 function queue() { return JSON.parse(localStorage.getItem(qKey) || '[]'); }
 function setQueue(items) { localStorage.setItem(qKey, JSON.stringify(items)); $('#queue').textContent = JSON.stringify(items, null, 2); }
 
@@ -82,27 +92,33 @@ async function report(status) {
     setQueue(items);
     $('#mobileResult').textContent = 'Offline gespeichert; automatische Synchronisation folgt.';
   }
-  load();
+  showView('start');
+load();
 }
 
 $('#setupForm').onsubmit = event => { event.preventDefault(); api('/api/auth/setup', { method: 'POST', body: JSON.stringify({ password: $('#setupPassword').value }) }).then(() => { $('#authStatus').textContent = 'Ersteinrichtung gespeichert. Bitte anmelden.'; return refreshAuth(); }).catch(error => { $('#authStatus').textContent = error.message; }); };
-$('#loginForm').onsubmit = event => { event.preventDefault(); api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: $('#loginEmail').value, password: $('#loginPassword').value }) }).then(result => { csrfToken = result.csrfToken; currentUser = result.user; return load(); }).catch(error => { $('#authStatus').textContent = error.message; }); };
+$('#loginForm').onsubmit = event => { event.preventDefault(); api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: $('#loginEmail').value, password: $('#loginPassword').value }) }).then(result => { csrfToken = result.csrfToken; currentUser = result.user; return showView('start');
+load(); }).catch(error => { $('#authStatus').textContent = error.message; }); };
 
 $('#complete').onclick = () => report('vollständig');
 $('#missing').onclick = () => report('abweichung');
 $('#blocked').onclick = () => { $('#mobileResult').textContent = 'Dringende Meldung erfasst: Fluchtweg blockiert'; };
 $('#snapshot').onclick = () => { if (requireLogin()) api('/api/exercises/snapshot', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load).catch(error => { $('#mobileResult').textContent = error.message; }); };
 $('#exerciseForm').onsubmit = event => { event.preventDefault(); if (requireLogin()) api('/api/exercises', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(load).catch(error => { $('#mobileResult').textContent = error.message; }); };
-$('#classForm').onsubmit = event => { event.preventDefault(); if (!requireLogin('#peopleResult')) return; api('/api/classes', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(result => { $('#peopleResult').textContent = `Klasse gespeichert: ${result.name}`; return load(); }).catch(error => { $('#peopleResult').textContent = error.message; }); };
-$('#studentForm').onsubmit = event => { event.preventDefault(); if (!requireLogin('#peopleResult')) return; api('/api/students', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(result => { $('#peopleResult').textContent = `Person gespeichert: ${result.firstName} ${result.lastName}`; return load(); }).catch(error => { $('#peopleResult').textContent = error.message; }); };
+$('#classForm').onsubmit = event => { event.preventDefault(); if (!requireLogin('#peopleResult')) return; api('/api/classes', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(result => { $('#peopleResult').textContent = `Klasse gespeichert: ${result.name}`; return showView('start');
+load(); }).catch(error => { $('#peopleResult').textContent = error.message; }); };
+$('#studentForm').onsubmit = event => { event.preventDefault(); if (!requireLogin('#peopleResult')) return; api('/api/students', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(result => { $('#peopleResult').textContent = `Person gespeichert: ${result.firstName} ${result.lastName}`; return showView('start');
+load(); }).catch(error => { $('#peopleResult').textContent = error.message; }); };
 $('#startExercise').onclick = () => { if (!requireLogin('#mobileResult')) return; api('/api/exercises/start', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load).catch(error => { $('#mobileResult').textContent = error.message; }); };
 $('#closeExercise').onclick = () => { if (!requireLogin('#mobileResult')) return; api('/api/exercises/close', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load).catch(error => { $('#mobileResult').textContent = error.message; }); };
 
 $('#portalSave').onclick = () => { if (!requireLogin('#portalOut')) return; api('/api/infoportal/config', { method: 'POST', body: JSON.stringify({ code: $('#portal').value }) }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); }).catch(error => { $('#portalOut').textContent = error.message; }); };
 $('#demoImport').onclick = () => { if (!requireLogin('#portalOut')) return; api('/api/import/demo', { method: 'POST' }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); }).catch(error => { $('#portalOut').textContent = error.message; }); };
-$('#studentImport').onclick = () => { if (!requireLogin('#portalOut')) return; api('/api/import/students.csv', { method: 'POST', body: JSON.stringify({ csv: $('#studentCsv').value }) }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); return load(); }).catch(error => { $('#portalOut').textContent = error.message; }); };
+$('#studentImport').onclick = () => { if (!requireLogin('#portalOut')) return; api('/api/import/students.csv', { method: 'POST', body: JSON.stringify({ csv: $('#studentCsv').value }) }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); return showView('start');
+load(); }).catch(error => { $('#portalOut').textContent = error.message; }); };
 $('#formSubmit').onsubmit = event => { event.preventDefault(); if (!requireLogin('#formResult')) return; api('/api/forms/submit', { method: 'POST', body: JSON.stringify({ templateId: $('#templateSelect').value, values: { summary: $('#formSummary').value, severity: 'mittel' } }) }).then(result => { $('#formResult').textContent = `Formular gespeichert: ${result.id}`; }).catch(error => { $('#formResult').textContent = error.message; }); };
 $('#actionForm').onsubmit = event => { event.preventDefault(); if (!requireLogin()) return; api('/api/actions', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(load).catch(error => { $('#authStatus').textContent = error.message; }); };
 window.addEventListener('online', sync);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+showView('start');
 load();
