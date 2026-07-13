@@ -1,0 +1,1 @@
+{"name":"sicherheits-tool-schule","private":true,"version":"0.3.0","type":"module","scripts":{"start":"node apps/api/src/server.js","test":"node --test tests/*.test.js","lint":"node tests/static-check.test.js","pm:sync:dry-run":"node scripts/sync-github-project.mjs","pm:sync":"node scripts/sync-github-project.mjs"},"engines":{"node":">=20"}}
