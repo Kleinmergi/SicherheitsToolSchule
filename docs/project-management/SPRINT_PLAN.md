@@ -31,10 +31,27 @@
 - Retrospektive: In-Memory-Daten sind ausreichend für Demo, müssen in Sprint 2 persistiert werden.
 - Verbesserungen: Persistenz und Exportfunktionen priorisieren.
 
-## Sprint 2 geplant
-- Sprintziel: Persistenz, Formulargenerator und druckfertige PDF-Listen ausbauen.
+## Sprint 2
+- Sprintziel: Persistenz, Formulargenerator, Drucklisten und Maßnahmenverwaltung als nutzbare Erweiterung liefern.
+- Startdatum: 2026-07-13
+- Enddatum: 2026-07-13
+- Dauer: 1 Tag
+- User Stories: US-008, US-009, US-010, US-011
+- Geplante Story Points: 34
+- Technische Aufgaben: Formulartypen definieren, Standardvorlagen erweitern, Einreichungen validieren, druckoptimierte Anwesenheitsliste, Maßnahmen aus Befunden, optionale JSON-Persistenz.
+- Abhängigkeiten: Sprint-1-Snapshot und Rollenrechte.
+- Teststrategie: Unit-Tests für Formularvalidierung, Duplizieren, Maßnahmen und Drucklisten.
+- Risiken: Browser-PDF ist abhängig vom Druckdialog; echte XLSX-Erzeugung folgt mit Bibliothek.
+- Ergebnis: Sprint 2 ist als weiterer Vertikalschnitt nutzbar.
+- Nicht abgeschlossen: PostgreSQL/Prisma, native XLSX-Dateien, digitale Signaturerfassung.
+- Sprint Review: Protokoll speichern, Maßnahme erzeugen und Druckliste öffnen funktionieren in der PWA.
+- Retrospektive: Domänenlogik ist besser testbar; nächster Schritt ist Datenbankpersistenz.
+- Verbesserungen: Datenzugriffsschicht für PostgreSQL vorbereiten.
+
+## Sprint 3 geplant
+- Sprintziel: PostgreSQL/Prisma, Benutzerverwaltung und Sicherheits-Härtung.
 - Startdatum: 2026-07-14
 - Enddatum: 2026-07-28
 - Dauer: 14 Tage
-- User Stories: US-008, US-009, US-010
-- Geplante Story Points: 29
+- User Stories: US-012
+- Geplante Story Points: 13

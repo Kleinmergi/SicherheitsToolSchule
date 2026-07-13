@@ -1,9 +1,60 @@
-const $=s=>document.querySelector(s);const qKey='offlineAttendanceQueue';
-async function api(url,opt={}){const r=await fetch(url,{headers:{'content-type':'application/json','x-role':'Administrator'},...opt});if(!r.ok)throw new Error(await r.text());return r.json()}
-function queue(){return JSON.parse(localStorage.getItem(qKey)||'[]')}function setQueue(q){localStorage.setItem(qKey,JSON.stringify(q));$('#queue').textContent=JSON.stringify(q,null,2)}
-async function sync(){const items=queue(); if(!navigator.onLine){$('#sync').textContent='Synchronisationsstatus: offline';return} for(const item of [...items]){await api('/api/attendance',{method:'POST',body:JSON.stringify(item)});setQueue(queue().filter(x=>x.clientId!==item.clientId))} $('#sync').textContent='Synchronisationsstatus: online und synchronisiert'}
-async function load(){const b=await api('/api/bootstrap');$('#forms').innerHTML=b.formTemplates.map(f=>`<li>${f}</li>`).join(''); await api('/api/exercises/snapshot',{method:'POST',body:JSON.stringify({exerciseId:'ex1'})}).catch(()=>{}); const d=await api('/api/dashboard?exerciseId=ex1'); $('#dashboard').innerHTML=`<p class="status">Erwartet: ${d.expectedTotal} · Gemeldet: ${d.reportedTotal} · bekannte Absenzen: ${d.knownAbsences.length}</p><h3>Aktuell vermisst</h3><table><tr><th>Name</th><th>Gruppe</th><th>Hinweis</th></tr>${d.missing.map(m=>`<tr><td>${m.personName}</td><td>${m.group}</td><td>${m.supportNeed?'Unterstützungsbedarf berechtigt prüfen':'-'}</td></tr>`).join('')}</table>`;setQueue(queue());sync()}
-async function report(status){const payload={clientId:crypto.randomUUID(),exerciseId:'ex1',group:'7A',status,presentPersonIds:status==='vollständig'?['s1','s2']:['s1'],missingPersonIds:status==='vollständig'?[]:['s2'],additionalPersons:[],assemblyPointId:'sp1'};try{await api('/api/attendance',{method:'POST',body:JSON.stringify(payload)});$('#mobileResult').textContent='Meldung verbindlich übermittelt';}catch(e){const q=queue();q.push(payload);setQueue(q);$('#mobileResult').textContent='Offline gespeichert; automatische Synchronisation folgt.'}load()}
-$('#complete').onclick=()=>report('vollständig');$('#missing').onclick=()=>report('abweichung');$('#blocked').onclick=()=>{$('#mobileResult').textContent='Dringende Meldung erfasst: Fluchtweg blockiert'};$('#snapshot').onclick=()=>api('/api/exercises/snapshot',{method:'POST',body:JSON.stringify({exerciseId:'ex1'})}).then(load);
-$('#exerciseForm').onsubmit=e=>{e.preventDefault();api('/api/exercises',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(e.target)))}).then(load)};$('#portalSave').onclick=()=>api('/api/infoportal/config',{method:'POST',body:JSON.stringify({code:$('#portal').value})}).then(x=>$('#portalOut').textContent=JSON.stringify(x,null,2));$('#demoImport').onclick=()=>api('/api/import/demo',{method:'POST'}).then(x=>$('#portalOut').textContent=JSON.stringify(x,null,2));
-window.addEventListener('online',sync);if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js');load();
+const $ = selector => document.querySelector(selector);
+const qKey = 'offlineAttendanceQueue';
+
+async function api(url, options = {}) {
+  const response = await fetch(url, { headers: { 'content-type': 'application/json', 'x-role': 'Administrator' }, ...options });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+function queue() { return JSON.parse(localStorage.getItem(qKey) || '[]'); }
+function setQueue(items) { localStorage.setItem(qKey, JSON.stringify(items)); $('#queue').textContent = JSON.stringify(items, null, 2); }
+
+async function sync() {
+  const items = queue();
+  if (!navigator.onLine) { $('#sync').textContent = 'Synchronisationsstatus: offline'; return; }
+  for (const item of [...items]) {
+    await api('/api/attendance', { method: 'POST', body: JSON.stringify(item) });
+    setQueue(queue().filter(entry => entry.clientId !== item.clientId));
+  }
+  $('#sync').textContent = 'Synchronisationsstatus: online und synchronisiert';
+}
+
+async function load() {
+  const bootstrap = await api('/api/bootstrap');
+  $('#forms').innerHTML = bootstrap.formTemplates.slice(0, 12).map(form => `<li>${form.name} · Version ${form.version}</li>`).join('');
+  $('#templateSelect').innerHTML = bootstrap.formTemplates.map(form => `<option value="${form.id}">${form.name}</option>`).join('');
+  $('#actions').innerHTML = bootstrap.actions.map(action => `<li>${action.title} · ${action.status} · Frist ${action.dueDate || 'offen'}</li>`).join('') || '<li>Keine offenen Maßnahmen</li>';
+  await api('/api/exercises/snapshot', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).catch(() => {});
+  const dashboard = await api('/api/dashboard?exerciseId=ex1');
+  $('#dashboard').innerHTML = `<p class="status">Erwartet: ${dashboard.expectedTotal} · Gemeldet: ${dashboard.reportedTotal} · bekannte Absenzen: ${dashboard.knownAbsences.length}</p><h3>Aktuell vermisst</h3><table><tr><th>Name</th><th>Gruppe</th><th>Hinweis</th></tr>${dashboard.missing.map(person => `<tr><td>${person.personName}</td><td>${person.group}</td><td>${person.supportNeed ? 'Unterstützungsbedarf berechtigt prüfen' : '-'}</td></tr>`).join('')}</table>`;
+  setQueue(queue());
+  sync();
+}
+
+async function report(status) {
+  const payload = { clientId: crypto.randomUUID(), exerciseId: 'ex1', group: '7A', status, presentPersonIds: status === 'vollständig' ? ['s1', 's2'] : ['s1'], missingPersonIds: status === 'vollständig' ? [] : ['s2'], additionalPersons: [], assemblyPointId: 'sp1' };
+  try {
+    await api('/api/attendance', { method: 'POST', body: JSON.stringify(payload) });
+    $('#mobileResult').textContent = 'Meldung verbindlich übermittelt';
+  } catch (error) {
+    const items = queue();
+    items.push(payload);
+    setQueue(items);
+    $('#mobileResult').textContent = 'Offline gespeichert; automatische Synchronisation folgt.';
+  }
+  load();
+}
+
+$('#complete').onclick = () => report('vollständig');
+$('#missing').onclick = () => report('abweichung');
+$('#blocked').onclick = () => { $('#mobileResult').textContent = 'Dringende Meldung erfasst: Fluchtweg blockiert'; };
+$('#snapshot').onclick = () => api('/api/exercises/snapshot', { method: 'POST', body: JSON.stringify({ exerciseId: 'ex1' }) }).then(load);
+$('#exerciseForm').onsubmit = event => { event.preventDefault(); api('/api/exercises', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(load); };
+$('#portalSave').onclick = () => api('/api/infoportal/config', { method: 'POST', body: JSON.stringify({ code: $('#portal').value }) }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); });
+$('#demoImport').onclick = () => api('/api/import/demo', { method: 'POST' }).then(result => { $('#portalOut').textContent = JSON.stringify(result, null, 2); });
+$('#formSubmit').onsubmit = event => { event.preventDefault(); api('/api/forms/submit', { method: 'POST', body: JSON.stringify({ templateId: $('#templateSelect').value, values: { summary: $('#formSummary').value, severity: 'mittel' } }) }).then(result => { $('#formResult').textContent = `Formular gespeichert: ${result.id}`; }); };
+$('#actionForm').onsubmit = event => { event.preventDefault(); api('/api/actions', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }).then(load); };
+window.addEventListener('online', sync);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+load();

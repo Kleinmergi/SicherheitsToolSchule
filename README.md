@@ -23,6 +23,10 @@ docker compose up --build
 - Infoportal-Konfiguration ohne erfundene API-Endpunkte: Schulkennung wird in die Login-URL umgewandelt, Provider-Reihenfolge bevorzugt offizielle API/Exports und fällt auf CSV/Excel/manuell/Demo zurück.
 - Übungsplanung mit Aufgaben- und Kalendereintrag.
 - Freigabe, Anwesenheits-Snapshot, mobile Anwesenheitsmeldung, Soll-Ist-Dashboard, CSV-Export und Audit-Log.
+- Formulargenerator mit validierten Feldtypen, Pflichtfeldprüfung, Duplizieren und Formular-Einreichungen.
+- Maßnahmenverwaltung mit Risiko, Priorität, Frist, Status und Verantwortlichkeit.
+- Druckoptimierte Anwesenheitsliste für Browser-PDF als Papierfallback.
+- Optionale JSON-Persistenz über `STS_DATA_FILE`.
 - PWA mit Service Worker, Manifest, Offline-Warteschlange in `localStorage` und Synchronisationsanzeige.
 
 ## Dokumentation
