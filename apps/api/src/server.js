@@ -29,7 +29,7 @@ function currentSession(req) {
 
 function publicUser(user) {
   if (!user) return null;
-  const { passwordHash, ...safe } = user;
+  const { passwordHash, ...safe } = user; 
   return safe;
 }
 
