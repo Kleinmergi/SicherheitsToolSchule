@@ -10,6 +10,7 @@ const apply = args.has('--apply');
 const owner = valueAfter('--owner');
 const repo = valueAfter('--repo');
 const project = valueAfter('--project') || 'SicherheitsToolSchule';
+const projectNumber = valueAfter('--project-number');
 
 function valueAfter(flag) {
   const index = process.argv.indexOf(flag);
@@ -38,7 +39,7 @@ if (apply && spawnSync('gh', ['--version']).status !== 0) {
   process.exit(1);
 }
 
-console.log(`# Sync-Plan für ${rows.length} User Stories, ${sprints.length} Milestones und Project "${project}"`);
+console.log(`# Sync-Plan für ${rows.length} User Stories, ${sprints.length} Milestones und Project "${project}"${projectNumber ? ` (#${projectNumber})` : ''}`);
 for (const label of labels) run(['gh', 'label', 'create', label, '--repo', owner && repo ? `${owner}/${repo}` : '<owner>/<repo>', '--force']);
 for (const sprint of sprints) run(['gh', 'api', `repos/${owner || '<owner>'}/${repo || '<repo>'}/milestones`, '-f', `title=Sprint ${sprint}`, '-f', 'state=open']);
 for (const row of rows) {
@@ -47,5 +48,7 @@ for (const row of rows) {
   const title = `${id}: ${story.replace(/^Als /, 'Als ')}`;
   const body = [`## Epic`, epic, `## Nutzen`, value, `## Story Points`, points, `## Abhängigkeiten`, dependencies, `## Akzeptanzkriterien`, acceptance, `## Lokaler Status`, status].join('\n\n');
   const priorityLabel = `priority:${priority.toLowerCase().split(' ')[0]}`;
-  run(['gh', 'issue', 'create', '--repo', owner && repo ? `${owner}/${repo}` : '<owner>/<repo>', '--title', JSON.stringify(title), '--body', JSON.stringify(body), '--label', `user-story,${priorityLabel}`, '--milestone', JSON.stringify(`Sprint ${sprint}`)]);
+  const issueCommand = ['gh', 'issue', 'create', '--repo', owner && repo ? `${owner}/${repo}` : '<owner>/<repo>', '--title', JSON.stringify(title), '--body', JSON.stringify(body), '--label', `user-story,${priorityLabel}`, '--milestone', JSON.stringify(`Sprint ${sprint}`)];
+  run(issueCommand);
+  if (projectNumber) run(['gh', 'project', 'item-add', projectNumber, '--owner', owner || '<owner>', '--url', `<issue-url-for-${id}>`]);
 }

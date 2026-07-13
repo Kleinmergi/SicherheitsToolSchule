@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.3 - 2026-07-13
+- Service Worker Cache auf Version v2 gehoben und alte Caches werden beim Aktivieren gelöscht.
+- Service Worker übernimmt neue Version sofort mit `skipWaiting()` und `clients.claim()`, damit der Browser nicht weiter eine alte Buffer-JSON-Startseite ausliefert.
+- Regressionstest für Service-Worker-Cache-Aktualisierung ergänzt.
+
+## 0.5.2 - 2026-07-13
+- Vorhandenes GitHub-Kanban wird in der Dokumentation unterstützt.
+- Sync-Skript um `--project-number` für vorhandene GitHub Projects erweitert.
+- CSV-Export für manuelle GitHub-Project-Befüllung ergänzt.
+
+## 0.5.1 - 2026-07-13
+- Fehler behoben, bei dem statische Dateien im Browser als JSON-serialisierte Buffer angezeigt wurden.
+- Regressionstest ergänzt, der die Startseite als echtes HTML prüft.
+
+## 0.5.0 - 2026-07-13
+- Klassen- und Schülerverwaltung als geschützte API und PWA-Formulare ergänzt.
+- CSV-Schülerimport mit Zeilenfehlerbericht ergänzt.
+- Übungsstatusübergänge Start und Abschluss mit Snapshot beziehungsweise Abschlusszusammenfassung ergänzt.
+- Tests für Stammdatenpflege, Import und Übungsstart/-abschluss ergänzt.
+
 ## 0.4.0 - 2026-07-13
 - Ersteinrichtung für initiales Administrator-Passwort ergänzt.
 - Login mit HttpOnly-Session-Cookie, CSRF-Token und Logout ergänzt.

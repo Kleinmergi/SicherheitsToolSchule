@@ -26,7 +26,7 @@ Die Sprintzuordnung folgt der gewünschten fachlichen Reihenfolge. Bereits vorha
 - Geplante Story Points: 39
 - Teststrategie: Importtests, Datenvalidierung, Übungsstatus-Tests, Checklisten-Tests.
 - Risiken: Excel-Import erfordert Bibliothek; zunächst CSV stabilisieren.
-- Status: US-007 und US-008 erledigt; Start/Abschluss werden verfeinert.
+- Status: US-005 bis US-010 erledigt; Excel-Import bleibt als Erweiterung, CSV-Import ist produktiv nutzbar.
 
 ## Sprint 3 – Mobile Anwesenheit
 - Zeitraum: 2026-08-13 bis 2026-08-27
